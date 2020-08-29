@@ -63,8 +63,9 @@ tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-
 tt$jour <- ymd(tt$jour)
 ```
 
+Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. Deux graphiques : France entière & Val d'Oise 
 
-
+# France entière
 
 ```{r graphFr, warning=TRUE}
 zz <- tt %>% 
@@ -89,7 +90,7 @@ zz <- tt %>%
                 )
 ```
 
-aaa
+# Val d'Oise
 
 ```{r graph95}
 tt %>% 
