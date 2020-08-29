@@ -30,7 +30,7 @@ editor_options:
 ---
 
 ```{r setup, include= FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
 # knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 rm(list = ls())
 ```
@@ -66,24 +66,49 @@ tt$jour <- ymd(tt$jour)
 
 
 
-```{r graphF}
+```{r graphFr, warning=TRUE}
 zz <- tt %>% 
   group_by(jour) %>%
   summarise(sum(incid_hosp))
   names(zz)[2] <- "cas"
-tail(zz,122) %>% 
-  ggplot() +
+
+  ggplot(tail(zz,122) ) +
   aes(x = jour, y = cas) +
   geom_point(size = 0) +
-  geom_smooth()
+  geom_smooth() +
+     labs(title = "France entière",
+             x = "Date",
+             y = "n") +
+      theme_light() + 
+     theme(plot.title = element_text(size=16, face="bold"), 
+                axis.title.x = element_text(size=12), 
+                axis.title.y = element_text(size=12),
+                axis.text.x = element_text(size=12),
+                axis.text.y = element_blank(),
+                legend.position = "none" 
+                )
 ```
 
-```{r}
+aaa
+
+```{r graph95}
 tt %>% 
   filter(dep == 95) %>% 
+  # tail(122) %>% 
   ggplot() +
   aes(x = jour, y = incid_hosp) +
   geom_point(size = 0) +
-  geom_smooth()
+  geom_smooth() +
+     labs(title = "Val d'Oise",
+             x = "Date",
+             y = "n") +
+      theme_light() + 
+     theme(plot.title = element_text(size=16, face="bold"), 
+                axis.title.x = element_text(size=12), 
+                axis.title.y = element_text(size=12),
+                axis.text.x = element_text(size=12),
+                axis.text.y = element_blank(),
+                legend.position = "none" 
+               ) 
 ```
 
