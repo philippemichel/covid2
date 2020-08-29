@@ -39,7 +39,7 @@ rm(list = ls())
 ```{r info}
 rm(list=ls())
 library("prettydoc")
-library("thesisph")
+# library("thesisph")
 library("missMDA")
 library("epiDisplay")
 library("factoextra")
@@ -52,15 +52,38 @@ library("viridis")
 library("stringr")
 library("tidyverse")
 library("kableExtra")
+library("lubridate")
 # sessionInfo()
 ```
 
 
 ```{r import}
-tt
+tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c")
+#
+tt$jour <- ymd(tt$jour)
 ```
 
 
 
 
+```{r graphF}
+zz <- tt %>% 
+  group_by(jour) %>%
+  summarise(sum(incid_hosp))
+  names(zz)[2] <- "cas"
+tail(zz,122) %>% 
+  ggplot() +
+  aes(x = jour, y = cas) +
+  geom_point(size = 0) +
+  geom_smooth()
+```
+
+```{r}
+tt %>% 
+  filter(dep == 95) %>% 
+  ggplot() +
+  aes(x = jour, y = incid_hosp) +
+  geom_point(size = 0) +
+  geom_smooth()
+```
 
