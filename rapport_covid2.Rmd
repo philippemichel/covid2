@@ -89,7 +89,7 @@ zz <- tt %>%
                 axis.title.x = element_text(size=12), 
                 axis.title.y = element_text(size=12),
                 axis.text.x = element_text(size=12),
-                axis.text.y = element_blank(),
+                axis.text.y = element_text(size=12),
                 legend.position = "none" 
                 )
 ```
@@ -97,10 +97,10 @@ zz <- tt %>%
 # Val d'Oise
 
 ```{r graph95}
-tt %>% 
-  filter(dep == 95) %>% 
-  # tail(122) %>% 
-  ggplot() +
+zz <- tt %>% 
+  filter(dep == 95)
+
+  ggplot(tail(zz,122) ) +
   aes(x = jour, y = incid_hosp) +
   geom_point(size = 0) +
   geom_smooth() +
@@ -112,7 +112,7 @@ tt %>%
                 axis.title.x = element_text(size=12), 
                 axis.title.y = element_text(size=12),
                 axis.text.x = element_text(size=12),
-                axis.text.y = element_blank(),
+                axis.text.y = element_text(size=12),
                 legend.position = "none" 
                ) 
 ```
