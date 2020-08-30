@@ -61,9 +61,13 @@ library("lubridate")
 tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c")
 #
 tt$jour <- ymd(tt$jour)
+dd <- last(tt$jour)
+dj <- paste0(substr(dd,9,10),"/",substr(dd,6,7),"/",substr(dd,1,4))
 ```
 
-Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. Deux graphiques : France entière & Val d'Oise 
+Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. Deux graphiques : France entière & Val d'Oise.
+
+Données à jour du `r dj`.
 
 # France entière
 
@@ -77,7 +81,7 @@ zz <- tt %>%
   aes(x = jour, y = cas) +
   geom_point(size = 0) +
   geom_smooth() +
-     labs(title = "France entière",
+     labs(title = paste0("France entière (",dj,")"),
              x = "Date",
              y = "n") +
       theme_light() + 
@@ -100,7 +104,7 @@ tt %>%
   aes(x = jour, y = incid_hosp) +
   geom_point(size = 0) +
   geom_smooth() +
-     labs(title = "Val d'Oise",
+     labs(title = paste0("Val d'Oise (",dj,")"),
              x = "Date",
              y = "n") +
       theme_light() + 
