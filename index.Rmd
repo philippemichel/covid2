@@ -1,0 +1,191 @@
+---
+title: "COVID"
+subtitle: "Nouveaux cas"
+author: "Philippe MICHEL"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: true
+    theme: lumen
+  # tufte::tufte_html: default
+  word_document:
+    toc: yes
+  html_notebook:
+    fig_caption: yes
+    theme: spacelab
+  pdf_document:
+    includes:
+      in_header: tete.tex
+    keep_tex: yes
+    latex_engine: lualatex
+    toc: yes  
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
+# knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+rm(list = ls())
+```
+
+
+```{r info}
+rm(list=ls())
+library("prettydoc")
+# library("thesisph")
+library("missMDA")
+library("epiDisplay")
+library("factoextra")
+library("atable")
+library("knitr")
+library("finalfit")
+library("Hmisc")
+library("xtable")
+library("viridis")
+library("stringr")
+library("tidyverse")
+library("kableExtra")
+library("lubridate")
+# sessionInfo()
+```
+
+
+```{r import}
+tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c")
+#
+tt$jour <- ymd(tt$jour)
+dd <- last(tt$jour)
+dj <- paste0(substr(dd,9,10),"/",substr(dd,6,7),"/",substr(dd,1,4))
+```
+
+Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. graphiques desentrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
+
+Données à jour du `r dj`.
+
+# France entière
+
+```{r graphFr, warning=TRUE}
+zz <- tt %>% 
+  group_by(jour) %>%
+  summarise(sum(incid_hosp))
+  names(zz)[2] <- "cas"
+
+  ggplot(tail(zz,122) ) +
+  # ggplot(zz) +
+  aes(x = jour, y = cas) +
+  geom_point(size = 0) +
+  geom_smooth(span = 0.2) +
+     labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
+             x = "Date",
+             y = "n") +
+      theme_light() + 
+     theme(plot.title = element_text(size=16, face="bold"), 
+                axis.title.x = element_text(size=12), 
+                axis.title.y = element_text(size=12),
+                axis.text.x = element_text(size=12),
+                axis.text.y = element_text(size=12),
+                legend.position = "none" 
+                )
+```
+
+```{r graphFrea, warning=TRUE}
+zz <- tt %>% 
+  group_by(jour) %>%
+  summarise(sum(incid_rea))
+names(zz)[2] <- "cas"
+
+ggplot(tail(zz,122) ) +
+  aes(x = jour, y = cas) +
+  geom_point(size = 0) +
+  geom_smooth(span = 0.2, col = "red") +
+  labs(title = paste0("France entière (",dj,") - admissions réanimation"),
+       x = "Date",
+       y = "n") +
+  theme_light() + 
+  theme(plot.title = element_text(size=16, face="bold"), 
+        axis.title.x = element_text(size=12), 
+        axis.title.y = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        legend.position = "none" 
+  )
+```
+
+# Val d'Oise
+
+```{r graph95, warning=TRUE}
+zz <- tt %>% 
+  filter(dep == 95)
+
+  ggplot(tail(zz,122) ) +
+  aes(x = jour, y = incid_hosp) +
+  geom_point(size = 0) +
+  geom_smooth( span = 0.2) +
+     labs(title = paste0("Val d'Oise (",dj,") - admissions hôpital"),
+             x = "Date",
+             y = "n") +
+      theme_light() + 
+     theme(plot.title = element_text(size=16, face="bold"), 
+                axis.title.x = element_text(size=12), 
+                axis.title.y = element_text(size=12),
+                axis.text.x = element_text(size=12),
+                axis.text.y = element_text(size=12),
+                legend.position = "none" 
+               ) 
+```
+
+
+```{r graph95rea}
+zz <- tt %>% 
+  filter(dep == 95)
+
+  ggplot(tail(zz,122) ) +
+  aes(x = jour, y = incid_rea) +
+  geom_point(size = 0) +
+  geom_smooth( span = 0.2, col = "red") +
+     labs(title = paste0("Val d'Oise (",dj,") - admissions en réanimation"),
+             x = "Date",
+             y = "n") +
+      theme_light() + 
+     theme(plot.title = element_text(size=16, face="bold"), 
+                axis.title.x = element_text(size=12), 
+                axis.title.y = element_text(size=12),
+                axis.text.x = element_text(size=12),
+                axis.text.y = element_text(size=12),
+                legend.position = "none" 
+               ) 
+```
+
+
+
+`{r group}
+tt %>%
+  filter(dep == 95) %>% 
+  mutate (hop = scale(incid_hosp)) %>% 
+  mutate (rea = scale(incid_rea)) %>% 
+  ggplot( ) +
+  aes(x = jour, y = hop) +
+  geom_point(size = 0) +
+  geom_smooth( span = 0.1, method = "loess") +
+  geom_point(size = 0 , y =rea) +
+     labs(title = paste0("France(",dj,") - admissions hôpital"),
+             x = "Date",
+             y = "n") +
+      theme_light() + 
+     theme(plot.title = element_text(size=16, face="bold"), 
+                axis.title.x = element_text(size=12), 
+                axis.title.y = element_text(size=12),
+                axis.text.x = element_text(size=12),
+                axis.text.y = element_text(size=12),
+                legend.position = "none" 
+               ) 
+```
+
+```
