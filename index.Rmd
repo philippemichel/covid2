@@ -13,9 +13,6 @@ output:
     toc: yes
     toc_float: true
     theme: lumen
-  # tufte::tufte_html: default
-  word_document:
-    toc: yes
   html_notebook:
     fig_caption: yes
     theme: spacelab
@@ -50,15 +47,17 @@ library("Hmisc")
 library("xtable")
 library("viridis")
 library("stringr")
-library("tidyverse")
+library("ggplot2")
 library("kableExtra")
 library("lubridate")
+library("wavelets")
+library("dplyr")
 # sessionInfo()
 ```
 
 
 ```{r import}
-tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c")
+tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c", as.is = FALSE)
 #
 tt$jour <- ymd(tt$jour)
 dd <- last(tt$jour)
@@ -71,18 +70,38 @@ Données à jour du `r dj`.
 
 # France entière
 
+
+
 ```{r graphFr, warning=TRUE}
-zz <- tt %>% 
+zzf <- tt %>% 
   group_by(jour) %>%
   summarise(sum(incid_hosp))
-  names(zz)[2] <- "cas"
+  names(zzf)[2] <- "cas"
+  
+ggplot(zzf) +
+  aes(x = jour, y = cas) +
+  geom_point(size = 0) +
+  geom_smooth(span = 0.2, col = "red") +
+  labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
+       subtitle = "Depuis le début de l'épidémie",
+       x = "Date",
+       y = "n") +
+  theme_light() + 
+  theme(plot.title = element_text(size=16, face="bold"), 
+        axis.title.x = element_text(size=12), 
+        axis.title.y = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        legend.position = "none" 
+  )
 
-  ggplot(tail(zz,122) ) +
-  # ggplot(zz) +
+  
+    ggplot(tail(zzf,122) ) +
   aes(x = jour, y = cas) +
   geom_point(size = 0) +
   geom_smooth(span = 0.2) +
      labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
+          subtitle =  "Trois derniers mois",
              x = "Date",
              y = "n") +
       theme_light() + 
@@ -94,6 +113,7 @@ zz <- tt %>%
                 legend.position = "none" 
                 )
 ```
+
 
 ```{r graphFrea, warning=TRUE}
 zz <- tt %>% 
@@ -163,29 +183,36 @@ zz <- tt %>%
                ) 
 ```
 
+# Variations hebdomadaires
 
-
-`{r group}
-tt %>%
-  filter(dep == 95) %>% 
-  mutate (hop = scale(incid_hosp)) %>% 
-  mutate (rea = scale(incid_rea)) %>% 
-  ggplot( ) +
-  aes(x = jour, y = hop) +
-  geom_point(size = 0) +
-  geom_smooth( span = 0.1, method = "loess") +
-  geom_point(size = 0 , y =rea) +
-     labs(title = paste0("France(",dj,") - admissions hôpital"),
+```{r hebdo}
+zzf$hebdo <- wday(zzf$jour,week_start = 1, label = TRUE)
+#zzf$hebdo <- str_sub(zzf$hebdo,1,3)
+zzf$we <- ifelse((zzf$hebdo == "sam\\."| zzf$hebdo == "dim\\."),"Week_end", "Semaine")
+#
+zzf %>% 
+  ggplot() +
+  aes(x= hebdo, y = cas, fill = we) +
+  geom_boxplot()+
+       labs(title = "Hospitalisations - France entière",
+            subtitle = "Variations hebdomadaires",
              x = "Date",
              y = "n") +
       theme_light() + 
      theme(plot.title = element_text(size=16, face="bold"), 
-                axis.title.x = element_text(size=12), 
-                axis.title.y = element_text(size=12),
-                axis.text.x = element_text(size=12),
+                axis.title.x = element_blank(),
+                axis.title.y = element_text(size=12, angle = 0),
+                axis.text.x = element_text(size=12), 
                 axis.text.y = element_text(size=12),
                 legend.position = "none" 
                ) 
 ```
 
+# Jours de la semaine
+
+**En construction**
+
+```{r jours}
+mtr <- mra(as.numeric(zzf$cas), n.levels = 3, boundary="reflection")
 ```
+
