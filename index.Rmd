@@ -52,6 +52,7 @@ library("kableExtra")
 library("lubridate")
 library("wavelets")
 library("dplyr")
+library("ggthemes")
 # sessionInfo()
 ```
 
@@ -86,7 +87,7 @@ ggplot(zzf) +
        subtitle = "Depuis le début de l'épidémie",
        x = "Date",
        y = "n") +
-  theme_light() + 
+  theme_tufte() + 
   theme(plot.title = element_text(size=16, face="bold"), 
         axis.title.x = element_text(size=12), 
         axis.title.y = element_text(size=12),
@@ -98,13 +99,13 @@ ggplot(zzf) +
   
     ggplot(tail(zzf,122) ) +
   aes(x = jour, y = cas) +
-  geom_point(size = 0) +
-  geom_smooth(span = 0.2) +
+  geom_line(size = 0.4) +
+  geom_smooth(span = 0.15) +
      labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
           subtitle =  "Trois derniers mois",
              x = "Date",
              y = "n") +
-      theme_light() + 
+      theme_tufte() + 
      theme(plot.title = element_text(size=16, face="bold"), 
                 axis.title.x = element_text(size=12), 
                 axis.title.y = element_text(size=12),
@@ -124,11 +125,11 @@ names(zz)[2] <- "cas"
 ggplot(tail(zz,122) ) +
   aes(x = jour, y = cas) +
   geom_point(size = 0) +
-  geom_smooth(span = 0.2, col = "red") +
+  geom_smooth(span = 0.15, col = "red") +
   labs(title = paste0("France entière (",dj,") - admissions réanimation"),
        x = "Date",
        y = "n") +
-  theme_light() + 
+  theme_tufte() + 
   theme(plot.title = element_text(size=16, face="bold"), 
         axis.title.x = element_text(size=12), 
         axis.title.y = element_text(size=12),
@@ -142,16 +143,16 @@ ggplot(tail(zz,122) ) +
 
 ```{r graph95, warning=TRUE}
 zz <- tt %>% 
-  filter(dep == 95)
+  dplyr::filter(dep == "95")
 
   ggplot(tail(zz,122) ) +
   aes(x = jour, y = incid_hosp) +
   geom_point(size = 0) +
-  geom_smooth( span = 0.2) +
+  geom_smooth( span = 0.15) +
      labs(title = paste0("Val d'Oise (",dj,") - admissions hôpital"),
              x = "Date",
              y = "n") +
-      theme_light() + 
+      theme_tufte() + 
      theme(plot.title = element_text(size=16, face="bold"), 
                 axis.title.x = element_text(size=12), 
                 axis.title.y = element_text(size=12),
@@ -164,16 +165,16 @@ zz <- tt %>%
 
 ```{r graph95rea}
 zz <- tt %>% 
-  filter(dep == 95)
+  dplyr::filter(dep == 95)
 
   ggplot(tail(zz,122) ) +
   aes(x = jour, y = incid_rea) +
   geom_point(size = 0) +
-  geom_smooth( span = 0.2, col = "red") +
+  geom_smooth( span = 0.15, col = "red") +
      labs(title = paste0("Val d'Oise (",dj,") - admissions en réanimation"),
              x = "Date",
              y = "n") +
-      theme_light() + 
+      theme_tufte() + 
      theme(plot.title = element_text(size=16, face="bold"), 
                 axis.title.x = element_text(size=12), 
                 axis.title.y = element_text(size=12),
@@ -198,7 +199,7 @@ zzf %>%
             subtitle = "Variations hebdomadaires",
              x = "Date",
              y = "n") +
-      theme_light() + 
+      theme_tufte(ticks = TRUE) + 
      theme(plot.title = element_text(size=16, face="bold"), 
                 axis.title.x = element_blank(),
                 axis.title.y = element_text(size=12, angle = 0),
