@@ -65,7 +65,7 @@ dd <- last(tt$jour)
 dj <- paste0(substr(dd,9,10),"/",substr(dd,6,7),"/",substr(dd,1,4))
 ```
 
-Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. graphiques desentrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
+Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. Graphiques des entrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
 
 Données à jour du `r dj`.
 
@@ -209,11 +209,37 @@ zzf %>%
                ) 
 ```
 
-# Jours de la semaine
+# Départements voisins
 
-**En construction**
 
-```{r jours}
-mtr <- mra(as.numeric(zzf$cas), n.levels = 3, boundary="reflection")
+```{r voisins}
+bb <- c(78, 95, 60, 27)
+ idf <- tt %>% 
+  dplyr::filter(is.element(dep, bb), jour > "2020-08-31") 
+idf$dep <- as.factor(idf$dep)
+bb <- c(78, 95, 60, 27)
+pop <- c(1395000,1105464,780000,541054)
+dpt <- data.frame(bb,pop)
+names(dpt) <- c("dep", "pop")
+dpt$dep <- as.factor(dpt$dep)
+
+left_join(idf, dpt, by = "dep") %>% 
+  mutate(hosp = incid_hosp*100000/pop) %>% 
+  mutate(dep = fct_drop(dep)) %>% 
+  ggplot() +
+  aes(x= jour, y = hosp, col = dep) +
+  geom_point(size = 0) +
+  geom_smooth(span = 0.3, se = FALSE) +
+  labs(title = paste0( "Admissions hôpital"),
+       x = "Date",
+       y = "n") +
+  theme_light() + 
+  theme(plot.title = element_text(size=16, face="bold"), 
+        axis.title.x = element_text(size=12), 
+        axis.title.y = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        legend.position = "right" 
+  ) 
 ```
 
