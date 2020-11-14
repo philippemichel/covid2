@@ -232,10 +232,10 @@ left_join(idf, dpt, by = "dep") %>%
   geom_smooth(span = 0.3, se = FALSE) +
   labs(title = paste0( "Admissions hôpital"),
        x = "Date",
-       y = "n") +
+       y = "n/100 000 habitants") +
   theme_light() + 
   theme(plot.title = element_text(size=16, face="bold"), 
-        axis.title.x = element_text(size=12), 
+        axis.title.x = element_blank(), 
         axis.title.y = element_text(size=12),
         axis.text.x = element_text(size=12),
         axis.text.y = element_text(size=12),
