@@ -83,6 +83,7 @@ zzf <- tt %>%
 ggplot(zzf) +
   aes(x = jour, y = cas) +
   geom_point(size = 0) +
+  # scale_y_log10() + 
   geom_smooth(span = 0.2, col = "red") +
   labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
        subtitle = "Depuis le début de l'épidémie",
