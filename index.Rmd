@@ -172,7 +172,7 @@ zz <- tt %>%
   ggplot(tail(zz,122) ) +
   aes(x = jour, y = incid_rea) +
   geom_point(size = 0) +
-  geom_smooth( span = 0.15, col = "red") +
+  geom_smooth( span = 0.2, col = "red") +
      labs(title = paste0("Val d'Oise (",dj,") - admissions en réanimation"),
              x = "Date",
              y = "n") +
