@@ -54,6 +54,7 @@ library("lubridate")
 library("wavelets")
 library("dplyr")
 library("ggthemes")
+library("plotly")
 # sessionInfo()
 ```
 
@@ -65,6 +66,34 @@ tt$jour <- ymd(tt$jour)
 dd <- last(tt$jour)
 dj <- paste0(substr(dd,9,10),"/",substr(dd,6,7),"/",substr(dd,1,4))
 ```
+
+```{r macro}
+mongg <- function(dd,
+                  dx = jour,
+                  dy = cas,
+                  tit,
+                  stit = "",
+                  colx) {
+  pp <- ggplot(dd) +
+  aes(x = {{dx}}, y = {{dy}}) +
+  geom_line(size = 0.4) +
+  geom_smooth(span = 0.15, col = colx) +
+  labs(title = paste0("<br>",tit),
+       subtitle =  stit,
+       y = "n") +
+  theme_tufte() +
+  theme(plot.title = element_text(size=16, face="bold"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        legend.position = "none"
+  )
+ggplotly(pp, tooltip=c("x","label", "y")) %>%
+  highlight("plotly_selected")
+}
+```
+
 
 Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. Graphiques des entrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
 
@@ -79,42 +108,12 @@ zzf <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_hosp))
   names(zzf)[2] <- "cas"
-  
-ggplot(zzf) +
-  aes(x = jour, y = cas) +
-  geom_point(size = 0) +
-  # scale_y_log10() + 
-  geom_smooth(span = 0.2, col = "red") +
-  labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
-       subtitle = "Depuis le début de l'épidémie",
-       x = "Date",
-       y = "n") +
-  theme_tufte() + 
-  theme(plot.title = element_text(size=16, face="bold"), 
-        axis.title.x = element_text(size=12), 
-        axis.title.y = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.position = "none" 
-  )
 
+titre <- paste0("France entière (",dj,") - nouvelles hospitalisations")
+ 
+mongg(zzf, tit ="France entière -  nouvelles hospitalisations", stit = "Depuis le début de l'épidémie", colx = "red") 
+mongg(tail(zzf,122), tit ="France entière - Trois derniers mois", stit ="trois derniers mois",colx ="blue")
   
-    ggplot(tail(zzf,122) ) +
-  aes(x = jour, y = cas) +
-  geom_line(size = 0.4) +
-  geom_smooth(span = 0.15) +
-     labs(title = paste0("France entière (",dj,") - nouvelles hospitalisations"),
-          subtitle =  "Trois derniers mois",
-             x = "Date",
-             y = "n") +
-      theme_tufte() + 
-     theme(plot.title = element_text(size=16, face="bold"), 
-                axis.title.x = element_text(size=12), 
-                axis.title.y = element_text(size=12),
-                axis.text.x = element_text(size=12),
-                axis.text.y = element_text(size=12),
-                legend.position = "none" 
-                )
 ```
 
 
@@ -124,21 +123,8 @@ zz <- tt %>%
   summarise(sum(incid_rea))
 names(zz)[2] <- "cas"
 
-ggplot(tail(zz,122) ) +
-  aes(x = jour, y = cas) +
-  geom_point(size = 0) +
-  geom_smooth(span = 0.15, col = "red") +
-  labs(title = paste0("France entière (",dj,") - admissions réanimation"),
-       x = "Date",
-       y = "n") +
-  theme_tufte() + 
-  theme(plot.title = element_text(size=16, face="bold"), 
-        axis.title.x = element_text(size=12), 
-        axis.title.y = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.position = "none" 
-  )
+mongg(tail(zzf,122), tit ="France entière - Admission réanimation", stit ="trois derniers mois",colx ="red")
+  
 ```
 
 # Val d'Oise
@@ -146,44 +132,20 @@ ggplot(tail(zz,122) ) +
 ```{r graph95, warning=TRUE}
 zz <- tt %>% 
   dplyr::filter(dep == "95")
+titre <- paste0("Val d'Oise (",dj,") - admissions hôpital")
 
-  ggplot(tail(zz,122) ) +
-  aes(x = jour, y = incid_hosp) +
-  geom_point(size = 0) +
-  geom_smooth( span = 0.15) +
-     labs(title = paste0("Val d'Oise (",dj,") - admissions hôpital"),
-             x = "Date",
-             y = "n") +
-      theme_tufte() + 
-     theme(plot.title = element_text(size=16, face="bold"), 
-                axis.title.x = element_text(size=12), 
-                axis.title.y = element_text(size=12),
-                axis.text.x = element_text(size=12),
-                axis.text.y = element_text(size=12),
-                legend.position = "none" 
-               ) 
+
+mongg(tail(zz,122), dy = incid_hosp, tit = titre, stit ="trois derniers mois",colx ="blue")
 ```
 
 
 ```{r graph95rea}
 zz <- tt %>% 
   dplyr::filter(dep == 95)
+titre <- paste0("Val d'Oise (",dj,") - admissions en réanimation")
 
-  ggplot(tail(zz,122) ) +
-  aes(x = jour, y = incid_rea) +
-  geom_point(size = 0) +
-  geom_smooth( span = 0.2, col = "red") +
-     labs(title = paste0("Val d'Oise (",dj,") - admissions en réanimation"),
-             x = "Date",
-             y = "n") +
-      theme_tufte() + 
-     theme(plot.title = element_text(size=16, face="bold"), 
-                axis.title.x = element_text(size=12), 
-                axis.title.y = element_text(size=12),
-                axis.text.x = element_text(size=12),
-                axis.text.y = element_text(size=12),
-                legend.position = "none" 
-               ) 
+mongg(tail(zz,122), dy = incid_hosp, tit = titre, stit ="trois derniers mois",colx ="red")
+
 ```
 
 # Variations hebdomadaires
@@ -192,9 +154,11 @@ zz <- tt %>%
 zzf$hebdo <- wday(zzf$jour,week_start = 1, label = TRUE)
 #zzf$hebdo <- str_sub(zzf$hebdo,1,3)
 zzf$we <- ifelse((zzf$hebdo == "sam\\."| zzf$hebdo == "dim\\."),"Week_end", "Semaine")
+
+
 #
-zzf %>% 
-  ggplot() +
+  pp <- zzf %>% 
+ggplot() +
   aes(x= hebdo, y = cas, fill = we) +
   geom_boxplot()+
        labs(title = "Hospitalisations - France entière",
@@ -209,6 +173,8 @@ zzf %>%
                 axis.text.y = element_text(size=12),
                 legend.position = "none" 
                ) 
+ppg <- ggplotly(pp, tooltip=c("x","label", "y"))
+ppg
 ```
 
 # Départements voisins
