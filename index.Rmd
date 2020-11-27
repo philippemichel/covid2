@@ -77,7 +77,7 @@ mongg <- function(dd,
   pp <- ggplot(dd) +
   aes(x = {{dx}}, y = {{dy}}) +
   geom_line(size = 0.4) +
-  geom_smooth(span = 0.15, col = colx) +
+  geom_smooth(span = 0.15, col = colx, se = FALSE, method = "loess") +
   labs(title = paste0("<br>",tit),
        subtitle =  stit,
        y = "n") +
@@ -89,8 +89,8 @@ mongg <- function(dd,
         axis.text.y = element_text(size=12),
         legend.position = "none"
   )
-ggplotly(pp, tooltip=c("x","label", "y")) %>%
-  highlight("plotly_selected")
+ggplotly(pp, tooltip=c("x","label", "y") )
+
 }
 ```
 
@@ -144,7 +144,7 @@ zz <- tt %>%
   dplyr::filter(dep == 95)
 titre <- paste0("Val d'Oise (",dj,") - admissions en réanimation")
 
-mongg(tail(zz,122), dy = incid_hosp, tit = titre, stit ="trois derniers mois",colx ="red")
+mongg(tail(zz,122), dy = incid_rea, tit = titre, stit ="trois derniers mois",colx ="red")
 
 ```
 
@@ -161,7 +161,7 @@ zzf$we <- ifelse((zzf$hebdo == "sam\\."| zzf$hebdo == "dim\\."),"Week_end", "Sem
 ggplot() +
   aes(x= hebdo, y = cas, fill = we) +
   geom_boxplot()+
-       labs(title = "Hospitalisations - France entière",
+       labs(title = "<br>Hospitalisations - France entière",
             subtitle = "Variations hebdomadaires",
              x = "Date",
              y = "n") +
@@ -191,12 +191,12 @@ dpt <- data.frame(bb,pop)
 names(dpt) <- c("dep", "pop")
 dpt$dep <- as.factor(dpt$dep)
 
-left_join(idf, dpt, by = "dep") %>% 
+pp <- left_join(idf, dpt, by = "dep") %>% 
   mutate(hosp = incid_hosp*100000/pop) %>% 
   mutate(dep = fct_drop(dep)) %>% 
   ggplot() +
   aes(x= jour, y = hosp, col = dep) +
-  geom_point(size = 0) +
+ # geom_point(size = 0) +
   geom_smooth(span = 0.3, se = FALSE) +
   labs(title = paste0( "Admissions hôpital"),
        x = "Date",
@@ -209,5 +209,7 @@ left_join(idf, dpt, by = "dep") %>%
         axis.text.y = element_text(size=12),
         legend.position = "right" 
   ) 
+ppd <- ggplotly(pp, tooltip=c("x","label", "y"))
+ppd
 ```
 
