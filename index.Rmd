@@ -13,6 +13,7 @@ output:
     toc: yes
     toc_float: true
     theme: lumen
+    anchor_sections: TRUE
   html_notebook:
     fig_caption: yes
     theme: spacelab
@@ -141,8 +142,8 @@ mongg(tail(zz,122), dy = incid_hosp, tit = titre, stit ="trois derniers mois",co
 
 ```{r graph95rea}
 zz <- tt %>% 
-  dplyr::filter(dep == 95)
-titre <- paste0("Val d'Oise (",dj,") - admissions en réanimation")
+  dplyr::filter(is.element(dep,c(60,95)))
+titre <- paste0("Val d'Oise + Oise (",dj,") - admissions en réanimation")
 
 mongg(tail(zz,122), dy = incid_rea, tit = titre, stit ="trois derniers mois",colx ="red")
 
