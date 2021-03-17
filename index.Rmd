@@ -1,6 +1,6 @@
 ---
-title: "COVID"
-subtitle: "Nouveaux cas"
+title: "COVID-19"
+subtitle: "Hospitalisations"
 author: "Philippe MICHEL"
 date: "`r Sys.Date()`"
 output:
@@ -28,11 +28,10 @@ editor_options:
 ---
 
 ```{r setup, include= FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
-# knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+#knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 rm(list = ls())
 ```
-
 
 ```{r info}
 rm(list=ls())
@@ -52,13 +51,12 @@ library("stringr")
 library("ggplot2")
 library("kableExtra")
 library("lubridate")
-library("wavelets")
+library("git2r")
 library("dplyr")
 library("ggthemes")
 library("plotly")
 # sessionInfo()
 ```
-
 
 ```{r import}
 tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c", as.is = FALSE)
@@ -74,14 +72,15 @@ mongg <- function(dd,
                   dy = cas,
                   tit,
                   stit = "",
-                  colx) {
+                  colx, 
+                  ytit = "n") {
   pp <- ggplot(dd) +
   aes(x = {{dx}}, y = {{dy}}) +
   geom_line(size = 0.4) +
-  geom_smooth(span = 0.15, col = colx, se = FALSE, method = "loess") +
+  geom_smooth(span = 0.3, col = colx, se = FALSE, method = "loess") +
   labs(title = paste0("<br>",tit),
        subtitle =  stit,
-       y = "n") +
+       y = ytit) +
   theme_tufte() +
   theme(plot.title = element_text(size=16, face="bold"),
         axis.title.x = element_blank(),
@@ -95,14 +94,11 @@ ggplotly(pp, tooltip=c("x","label", "y") )
 }
 ```
 
-
-Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS. La présentation met en avant la moyenne mobile. Graphiques des entrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
+Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois. Données issues de l'INVS (Santé publique France). La présentation met en avant la moyenne mobile. Graphiques des entrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
 
 Données à jour du `r dj`.
 
 # France entière
-
-
 
 ```{r graphFr, warning=TRUE}
 zzf <- tt %>% 
@@ -117,15 +113,29 @@ mongg(tail(zzf,122), tit ="France entière - Trois derniers mois", stit ="trois 
   
 ```
 
-
 ```{r graphFrea, warning=TRUE}
 zz <- tt %>% 
   group_by(jour) %>%
   summarise(sum(incid_rea))
 names(zz)[2] <- "cas"
 
-mongg(tail(zzf,122), tit ="France entière - Admission réanimation", stit ="trois derniers mois",colx ="red")
+mongg(tail(zzf,122), tit ="France - Admission réanimation", stit ="trois derniers mois",colx ="red")
   
+```
+
+## Ratio réa/hospitalisation
+
+Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission en réa / nb d'hospitalisation doit monter.
+
+```{r ratio}
+zzf <- tt %>%  
+  group_by(jour) %>% 
+    summarise(hosp = sum(incid_hosp),rea = sum(incid_rea)) %>% 
+  mutate(cas = 100*rea/hosp)
+
+titre <- paste0(dj," % admission réa / hospitalisation")
+mongg(tail(zzf,122), tit =titre, stit = " Trois derniers mois", colx = "red", ytit = "%")   
+
 ```
 
 # Val d'Oise
@@ -138,7 +148,6 @@ titre <- paste0("Val d'Oise (",dj,") - admissions hôpital")
 
 mongg(tail(zz,122), dy = incid_hosp, tit = titre, stit ="trois derniers mois",colx ="blue")
 ```
-
 
 ```{r graph95rea}
 zz <- tt %>% 
@@ -180,7 +189,6 @@ ppg
 
 # Départements voisins
 
-
 ```{r voisins}
 bb <- c(78, 95, 60, 27)
  idf <- tt %>% 
@@ -213,4 +221,3 @@ pp <- left_join(idf, dpt, by = "dep") %>%
 ppd <- ggplotly(pp, tooltip=c("x","label", "y"))
 ppd
 ```
-
