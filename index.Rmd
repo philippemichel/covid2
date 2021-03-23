@@ -81,7 +81,7 @@ mongg <- function(dd,
   labs(title = paste0("<br>",tit),
        subtitle =  stit,
        y = ytit) +
-  theme_tufte() +
+  theme_light() +
   theme(plot.title = element_text(size=16, face="bold"),
         axis.title.x = element_blank(),
         axis.title.y = element_text(size=12),
@@ -123,20 +123,59 @@ mongg(tail(zzf,122), tit ="France - Admission réanimation", stit ="trois dernie
   
 ```
 
+## Moyenne hebdomadaire des admissions hospitalières
+
+```{r mhebdo}
+tz <- NULL
+dz <- NULL
+zz <- tt %>% 
+  group_by(jour) %>% 
+  summarise(sum(incid_hosp))
+nz <- rev(seq(length(zz$jour)-6,1,-7))
+for (l in nz){
+  l1 <- l+6
+  tz <- c(tz, sum(zz[l:l1,2]))
+  dz <- c(dz,zz$jour[l])
+}
+dz <- as.Date(dz,origin = "1970-01-01")
+aa <- tibble(dz,tz)
+names(aa) <- c("jour","n")
+sem <- aa %>% 
+  ggplot() +
+  aes(x = jour, y = n) +
+  geom_line() +  labs(title = "Admissions hospitalières",
+                      subtitle =  "Moyennes hebdomadaires",
+                      y = "n") +
+  theme_light() +
+  theme(plot.title = element_text(size=16, face="bold"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size=12),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        legend.position = "none"
+  )
+ggplotly(sem, tooltip=c("x","label", "y") )
+```
+
 ## Ratio réa/hospitalisation
 
 Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission en réa / nb d'hospitalisation doit monter.
 
-```{r ratio}
-zzf <- tt %>%  
-  group_by(jour) %>% 
-    summarise(hosp = sum(incid_hosp),rea = sum(incid_rea)) %>% 
-  mutate(cas = 100*rea/hosp)
+      r ratio
+    }
+    zzf <- tt %>%
+      group_by(jour) %>%
+      summarise(hosp = sum(incid_hosp),rea = sum(incid_rea)) %>%
+      mutate(cas = 100*rea/hosp)
 
-titre <- paste0(dj," % admission réa / hospitalisation")
-mongg(tail(zzf,122), tit =titre, stit = " Trois derniers mois", colx = "red", ytit = "%")   
-
-```
+    titre <- paste0(dj, " admission réa / hospitalisation")
+    mongg(
+      tail(zzf, 122),
+      tit = titre,
+      stit = " Trois derniers mois",
+      colx = "red",
+      ytit = "%"
+    )   
 
 # Val d'Oise
 
