@@ -161,8 +161,7 @@ ggplotly(sem, tooltip=c("x","label", "y") )
 
 Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission en réa / nb d'hospitalisation doit monter.
 
-      r ratio
-    }
+```{r ratio}
     zzf <- tt %>%
       group_by(jour) %>%
       summarise(hosp = sum(incid_hosp),rea = sum(incid_rea)) %>%
