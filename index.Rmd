@@ -36,8 +36,6 @@ rm(list = ls())
 ```{r info}
 rm(list=ls())
 library("prettydoc")
-# library("thesisph")
-library("missMDA")
 library("forcats")
 library("epiDisplay")
 library("factoextra")
@@ -72,24 +70,31 @@ mongg <- function(dd,
                   dy = cas,
                   tit,
                   stit = "",
-                  colx, 
+                  colx,
                   ytit = "n") {
   pp <- ggplot(dd) +
-  aes(x = {{dx}}, y = {{dy}}) +
-  geom_line(size = 0.4) +
-  geom_smooth(span = 0.3, col = colx, se = FALSE, method = "loess") +
-  labs(title = paste0("<br>",tit),
-       subtitle =  stit,
-       y = ytit) +
-  theme_light() +
-  theme(plot.title = element_text(size=16, face="bold"),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.position = "none"
-  )
-ggplotly(pp, tooltip=c("x","label", "y") )
+    aes(x = {{dx}}, 
+        y = {{dy}}) +
+    geom_line(size = 0.4) +
+    geom_smooth(
+      span = 0.3,
+      col = colx,
+      se = FALSE,
+      method = "loess"
+    ) +
+    labs(title = paste0("<br>", tit),
+         subtitle =  stit,
+         y = ytit) +
+    theme_light() +
+    theme(
+      plot.title = element_text(size = 16, face = "bold"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(size = 12),
+      axis.text.x = element_text(size = 12),
+      axis.text.y = element_text(size = 12),
+      legend.position = "none"
+    )
+  ggplotly(pp, tooltip = c("all"))
 
 }
 ```
@@ -101,60 +106,75 @@ Données à jour du `r dj`.
 # France entière
 
 ```{r graphFr, warning=TRUE}
-zzf <- tt %>% 
+zzf <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_hosp))
-  names(zzf)[2] <- "cas"
+names(zzf)[2] <- "cas"
 
-titre <- paste0("France entière (",dj,") - nouvelles hospitalisations")
- 
-mongg(zzf, tit ="France entière -  nouvelles hospitalisations", stit = "Depuis le début de l'épidémie", colx = "red") 
-mongg(tail(zzf,122), tit ="France entière - Trois derniers mois", stit ="trois derniers mois",colx ="blue")
-  
+titre <-
+  paste0("France entière (", dj, ") - nouvelles hospitalisations")
+
+mongg(zzf,
+      tit = "France entière -  nouvelles hospitalisations",
+      stit = "Depuis le début de l'épidémie",
+      colx = "red")
+mongg(tail(zzf, 122),
+      tit = "France entière - Trois derniers mois",
+      stit = "trois derniers mois",
+      colx = "blue")
+
 ```
 
 ```{r graphFrea, warning=TRUE}
-zz <- tt %>% 
+zz <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_rea))
 names(zz)[2] <- "cas"
 
-mongg(tail(zzf,122), tit ="France - Admission réanimation", stit ="trois derniers mois",colx ="red")
+mongg(tail(zzf, 122),
+      tit = "France - Admission réanimation",
+      stit = "trois derniers mois",
+      colx = "red")
   
 ```
 
 ## Moyenne hebdomadaire des admissions hospitalières
 
+Le jour indiqué est le premier semaine soit, pour le dernier point, j-6.
+
 ```{r mhebdo}
 tz <- NULL
 dz <- NULL
-zz <- tt %>% 
-  group_by(jour) %>% 
+zz <- tt %>%
+  group_by(jour) %>%
   summarise(sum(incid_hosp))
-nz <- rev(seq(length(zz$jour)-6,1,-7))
-for (l in nz){
-  l1 <- l+6
-  tz <- c(tz, sum(zz[l:l1,2]))
-  dz <- c(dz,zz$jour[l])
+nz <- rev(seq(length(zz$jour) - 6, 1, -7))
+for (l in nz) {
+  l1 <- l + 6
+  tz <- c(tz, sum(zz[l:l1, 2]))
+  dz <- c(dz, zz$jour[l])
 }
-dz <- as.Date(dz,origin = "1970-01-01")
-aa <- tibble(dz,tz)
-names(aa) <- c("jour","n")
-sem <- aa %>% 
+dz <- as.Date(dz, origin = "1970-01-01")
+aa <- tibble(dz, tz)
+names(aa) <- c("jour", "n")
+sem <- aa %>%
   ggplot() +
   aes(x = jour, y = n) +
-  geom_line() +  labs(title = "Admissions hospitalières",
-                      subtitle =  "Moyennes hebdomadaires",
-                      y = "n") +
+  geom_line() +
+  geom_area(fill = "red", alpha = 0.4) +
+  labs(title = "Admissions hospitalières - Hebdo",
+       subtitle =  "Moyennes hebdomadaires",
+       y = "n") +
   theme_light() +
-  theme(plot.title = element_text(size=16, face="bold"),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.position = "none"
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "none"
   )
-ggplotly(sem, tooltip=c("x","label", "y") )
+ggplotly(sem, tooltip = c("x", "label", "y"))
 ```
 
 ## Ratio réa/hospitalisation
@@ -175,24 +195,38 @@ Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission
       colx = "red",
       ytit = "%"
     )   
+```
 
 # Val d'Oise
 
 ```{r graph95, warning=TRUE}
-zz <- tt %>% 
+zz <- tt %>%
   dplyr::filter(dep == "95")
-titre <- paste0("Val d'Oise (",dj,") - admissions hôpital")
+titre <- paste0("Val d'Oise (", dj, ") - admissions hôpital")
 
 
-mongg(tail(zz,122), dy = incid_hosp, tit = titre, stit ="trois derniers mois",colx ="blue")
+mongg(
+  tail(zz, 122),
+  dy = incid_hosp,
+  tit = titre,
+  stit = "trois derniers mois",
+  colx = "blue"
+)
 ```
 
 ```{r graph95rea}
-zz <- tt %>% 
-  dplyr::filter(is.element(dep,c(60,95)))
-titre <- paste0("Val d'Oise + Oise (",dj,") - admissions en réanimation")
+zz <- tt %>%
+  dplyr::filter(is.element(dep, c(60, 95)))
+titre <-
+  paste0("Val d'Oise + Oise (", dj, ") - admissions en réanimation")
 
-mongg(tail(zz,122), dy = incid_rea, tit = titre, stit ="trois derniers mois",colx ="red")
+mongg(
+  tail(zz, 122),
+  dy = incid_rea,
+  tit = titre,
+  stit = "trois derniers mois",
+  colx = "red"
+)
 
 ```
 
@@ -200,28 +234,30 @@ mongg(tail(zz,122), dy = incid_rea, tit = titre, stit ="trois derniers mois",col
 
 ```{r hebdo}
 zzf$hebdo <- wday(zzf$jour,week_start = 1, label = TRUE)
-#zzf$hebdo <- str_sub(zzf$hebdo,1,3)
 zzf$we <- ifelse((zzf$hebdo == "sam\\."| zzf$hebdo == "dim\\."),"Week_end", "Semaine")
 
 
 #
-  pp <- zzf %>% 
-ggplot() +
-  aes(x= hebdo, y = cas, fill = we) +
-  geom_boxplot()+
-       labs(title = "<br>Hospitalisations - France entière",
-            subtitle = "Variations hebdomadaires",
-             x = "Date",
-             y = "n") +
-      theme_tufte(ticks = TRUE) + 
-     theme(plot.title = element_text(size=16, face="bold"), 
-                axis.title.x = element_blank(),
-                axis.title.y = element_text(size=12, angle = 0),
-                axis.text.x = element_text(size=12), 
-                axis.text.y = element_text(size=12),
-                legend.position = "none" 
-               ) 
-ppg <- ggplotly(pp, tooltip=c("x","label", "y"))
+pp <- zzf %>%
+  ggplot() +
+  aes(x = hebdo, y = cas, fill = we) +
+  geom_boxplot() +
+  labs(
+    title = "<br>Hospitalisations - France entière",
+    subtitle = "Variations hebdomadaires",
+    x = "Date",
+    y = "n"
+  ) +
+  theme_tufte(ticks = TRUE) +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12, angle = 0),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "none"
+  )
+ppg <- ggplotly(pp, tooltip = c("all"))
 ppg
 ```
 
@@ -229,33 +265,34 @@ ppg
 
 ```{r voisins}
 bb <- c(78, 95, 60, 27)
- idf <- tt %>% 
-  dplyr::filter(is.element(dep, bb), jour > "2020-08-31") 
+idf <- tt %>%
+  dplyr::filter(is.element(dep, bb), jour > "2020-08-31")
 idf$dep <- as.factor(idf$dep)
 bb <- c(78, 95, 60, 27)
-pop <- c(1395000,1105464,780000,541054)
-dpt <- data.frame(bb,pop)
+pop <- c(1395000, 1105464, 780000, 541054)
+dpt <- data.frame(bb, pop)
 names(dpt) <- c("dep", "pop")
 dpt$dep <- as.factor(dpt$dep)
 
-pp <- left_join(idf, dpt, by = "dep") %>% 
-  mutate(hosp = incid_hosp*100000/pop) %>% 
-  mutate(dep = fct_drop(dep)) %>% 
+pp <- left_join(idf, dpt, by = "dep") %>%
+  mutate(hosp = incid_hosp * 100000 / pop) %>%
+  mutate(dep = fct_drop(dep)) %>%
   ggplot() +
-  aes(x= jour, y = hosp, col = dep) +
- # geom_point(size = 0) +
+  aes(x = jour, y = hosp, col = dep) +
+  # geom_point(size = 0) +
   geom_smooth(span = 0.3, se = FALSE) +
-  labs(title = paste0( "Admissions hôpital"),
+  labs(title = paste0("Admissions hôpital"),
        x = "Date",
        y = "n/100 000 habitants") +
-  theme_light() + 
-  theme(plot.title = element_text(size=16, face="bold"), 
-        axis.title.x = element_blank(), 
-        axis.title.y = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        legend.position = "right" 
-  ) 
-ppd <- ggplotly(pp, tooltip=c("x","label", "y"))
+  theme_light() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "bottom"
+  )
+ppd <- ggplotly(pp, tooltip = c("all"))
 ppd
 ```
