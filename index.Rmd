@@ -181,7 +181,7 @@ ggplotly(sem, tooltip = c("x", "label", "y"))
 
 ## Ratio réa/hospitalisation
 
-Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission en réa / nb d'hospitalisation doit monter. À l'inverse si le vaccin protège des formes graves il devrait baisser. Une marge d'erreur est à prévoir car les admissions en réa sont souvent retardées par rapport à l'admission à l'hôpital d'où un flou.
+Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission en réa / nb d'hospitalisation doit monter. À l'inverse si le vaccin protège des formes graves il devrait baisser. Une marge d'erreur est à prévoir car les admissions en réa sont souvent retardées par rapport à l'admission à l'hôpital d'où un flou. De plus les critère d'hospitalisation  (générale ou en réanimation) varient selon le temps : on sera plus sélectif en période de stress par ex.  
 
 ```{r ratio}
     zzf <- tt %>%
