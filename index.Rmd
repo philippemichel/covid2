@@ -27,39 +27,29 @@ editor_options:
   chunk_output_type: console
 ---
 
+
+
 ```{r setup, include= FALSE}
-#knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
+# knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 rm(list = ls())
 ```
 
 ```{r info}
-rm(list=ls())
-library("prettydoc")
+rm(list = ls())
 library("forcats")
-library("epiDisplay")
-library("factoextra")
-library("atable")
-library("knitr")
-library("finalfit")
-library("Hmisc")
-library("xtable")
-library("viridis")
-library("stringr")
 library("ggplot2")
-library("kableExtra")
 library("lubridate")
-library("git2r")
 library("dplyr")
-library("ggthemes")
 library("plotly")
 # sessionInfo()
 ```
 
 ```{r import}
 tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c",
-                as.is = FALSE) %>% 
-      filter(!dep %in% c("971","972", "973" ,"974", "976"))
+  as.is = FALSE
+) %>%
+  filter(!dep %in% c("971", "972", "973", "974", "976"))
 #
 tt$jour <- ymd(tt$jour)
 dd <- last(tt$jour)
@@ -75,29 +65,32 @@ mongg <- function(dd,
                   colx,
                   ytit = "n") {
   pp <- ggplot(dd) +
-    aes(x = {{dx}}, 
-        y = {{dy}}) +
+    aes(
+      x = {{ dx }},
+      y = {{ dy }}
+    ) +
     geom_line(size = 0.4) +
     geom_smooth(
-        span = 0.3,
-        col = colx,
-        se = FALSE,
-        method = "loess"
+      span = 0.3,
+      col = colx,
+      se = FALSE,
+      method = "loess"
     ) +
-    labs(title = paste0("<br>", tit),
-           subtitle =  stit,
-           y = ytit) +
+    labs(
+      title = paste0("<br>", tit),
+      subtitle = stit,
+      y = ytit
+    ) +
     theme_light() +
     theme(
-        plot.title = element_text(size = 16, face = "bold"),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12),
-        legend.position = "none"
+      plot.title = element_text(size = 16, face = "bold"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(size = 12),
+      axis.text.x = element_text(size = 12),
+      axis.text.y = element_text(size = 12),
+      legend.position = "none"
     )
-  ggplotly(pp, tooltip = c("all"))
-
+ ggplotly(pp, tooltip = c("all"))
 }
 ```
 
@@ -107,7 +100,7 @@ Données à jour le `r dj`.
 
 # France entière
 
-```{r graphFr, warning=TRUE}
+```{r graphFr, warning=TRUE, }
 zzf <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_hosp))
@@ -115,16 +108,21 @@ names(zzf)[2] <- "cas"
 
 titre <-
   paste0("France (", dj, ") - nouvelles hospitalisations")
-
 mongg(zzf,
-      tit = "France entière -  nouvelles hospitalisations",
-      stit = "Depuis le début de l'épidémie",
-      colx = "red")
-mongg(tail(zzf, 122),
-      tit = "France entière - Trois derniers mois",
-      stit = "trois derniers mois",
-      colx = "blue")
+  tit = "France entière -  nouvelles hospitalisations",
+  stit = "Depuis le début de l'épidémie",
+  colx = "red"
+)
+```
 
+
+```{r graphFr2, warning=TRUE, }
+
+mongg(tail(zzf, 122),
+  tit = "France entière - Trois derniers mois",
+  stit = "trois derniers mois",
+  colx = "blue"
+)
 ```
 
 ```{r graphFrea, warning=TRUE}
@@ -134,15 +132,15 @@ zz <- tt %>%
 names(zz)[2] <- "cas"
 
 mongg(tail(zz, 122),
-      tit = "France - Admission réanimation",
-      stit = "trois derniers mois",
-      colx = "red")
-  
+  tit = "France - Admission réanimation",
+  stit = "trois derniers mois",
+  colx = "red"
+)
 ```
 
 ## Moyenne hebdomadaire des admissions hospitalières
 
-Le jour indiqué est le premier semaine soit, pour le dernier point, j-6.
+Le jour indiqué est le premier semaine soit, pour le dernier point, j-6. Échelle logarithmique. Courbe sur un an.
 
 ```{r mhebdo}
 tz <- NULL
@@ -150,6 +148,7 @@ dz <- NULL
 zz <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_hosp))
+zz <- tail(zz, 371)
 nz <- rev(seq(length(zz$jour) - 6, 1, -7))
 for (l in nz) {
   l1 <- l + 6
@@ -163,10 +162,14 @@ sem <- aa %>%
   ggplot() +
   aes(x = jour, y = n) +
   geom_line() +
+  scale_y_log10() +
+  scale_x_date() +
   geom_area(fill = "red", alpha = 0.4) +
-  labs(title = "Admissions hospitalières - Hebdo",
-       subtitle =  "Moyennes hebdomadaires",
-       y = "n") +
+  labs(
+    title = "Admissions hospitalières - Hebdo",
+    subtitle = "Moyennes hebdomadaires",
+    y = "n"
+  ) +
   theme_light() +
   theme(
     plot.title = element_text(size = 16, face = "bold"),
@@ -184,19 +187,19 @@ ggplotly(sem, tooltip = c("x", "label", "y"))
 Si le nouveau variant devenu majoritaire est plus grave, le ratio nb d'admission en réa / nb d'hospitalisation doit monter. À l'inverse si le vaccin protège des formes graves il devrait baisser. Une marge d'erreur est à prévoir car les admissions en réa sont souvent retardées par rapport à l'admission à l'hôpital d'où un flou. De plus les critère d'hospitalisation  (générale ou en réanimation) varient selon le temps : on sera plus sélectif en période de stress par ex.  
 
 ```{r ratio}
-    zzf <- tt %>%
-      group_by(jour) %>%
-      summarise(hosp = sum(incid_hosp),rea = sum(incid_rea)) %>%
-      mutate(cas = 100*rea/hosp)
+zzf <- tt %>%
+  group_by(jour) %>%
+  summarise(hosp = sum(incid_hosp), rea = sum(incid_rea)) %>%
+  mutate(cas = 100 * rea / hosp)
 
-    titre <- paste0(dj, " admission réa / hospitalisation")
-    mongg(
-      tail(zzf, 122),
-      tit = titre,
-      stit = " Trois derniers mois",
-      colx = "red",
-      ytit = "%"
-    )   
+titre <- paste0(dj, " admission réa / hospitalisation")
+mongg(
+  tail(zzf, 365),
+  tit = titre,
+  stit = " Trois derniers mois",
+  colx = "red",
+  ytit = "%"
+)
 ```
 
 # Val d'Oise
@@ -212,7 +215,7 @@ mongg(
   dy = incid_hosp,
   tit = titre,
   stit = "trois derniers mois",
-  colx = "blue" 
+  colx = "blue"
 )
 ```
 
@@ -229,14 +232,13 @@ mongg(
   stit = "trois derniers mois",
   colx = "red"
 )
-
 ```
 
 # Variations hebdomadaires
 
 ```{r hebdo}
-zzf$hebdo <- wday(zzf$jour,week_start = 1, label = TRUE)
-zzf$we <- ifelse((zzf$hebdo == "sam\\."| zzf$hebdo == "dim\\."),"Week_end", "Semaine")
+zzf$hebdo <- wday(zzf$jour, week_start = 1, label = TRUE)
+zzf$we <- ifelse((zzf$hebdo == "sam\\." | zzf$hebdo == "dim\\."), "Week_end", "Semaine")
 
 
 #
@@ -250,7 +252,7 @@ pp <- zzf %>%
     x = "Date",
     y = "n"
   ) +
-  theme_tufte(ticks = TRUE) +
+  theme_light() +
   theme(
     plot.title = element_text(size = 16, face = "bold"),
     axis.title.x = element_blank(),
@@ -283,9 +285,11 @@ pp <- left_join(idf, dpt, by = "dep") %>%
   aes(x = jour, y = hosp, col = dep) +
   # geom_point(size = 0) +
   geom_smooth(span = 0.3, se = FALSE) +
-  labs(title = paste0("Admissions hôpital"),
-       x = "Date",
-       y = "n/100 000 habitants") +
+  labs(
+    title = paste0("Admissions hôpital"),
+    x = "Date",
+    y = "n/100 000 habitants"
+  ) +
   theme_light() +
   theme(
     plot.title = element_text(size = 16, face = "bold"),
@@ -298,3 +302,5 @@ pp <- left_join(idf, dpt, by = "dep") %>%
 ppd <- ggplotly(pp, tooltip = c("all"))
 ppd
 ```
+
+
