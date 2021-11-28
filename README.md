@@ -9,3 +9,5 @@ Focus sur le Val d'Oise & comparaison avec les départements voisins,
 Rapport admissions en Réa/hospitalisations
 
 Exploitation des données de Santé Publique France disponibles sur [data.gouv.fr](https://www.data.gouv.fr/fr/pages/donnees-coronavirus/).
+
+Résyultats visibles sur [https://philippemichel.github.io/covid2/](https://philippemichel.github.io/covid2/)
