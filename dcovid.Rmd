@@ -1,0 +1,155 @@
+---
+title: "COVID-19"
+subtitle: "Hospitalisations"
+author: "Philippe MICHEL"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    social: menu
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+library("forcats")
+library("ggplot2")
+library("lubridate")
+library("dplyr")
+library("plotly")
+library(flexdashboard)
+```
+
+
+```{r import, cache = TRUE}
+tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c",
+  as.is = FALSE
+) %>%
+  filter(!dep %in% c("971", "972", "973", "974", "976"))
+#
+tt$jour <- ymd(tt$jour)
+dd <- last(tt$jour)
+dj <- format(dd, "%d %B %Y")
+```
+
+```{r macro}
+mongg <- function(dd,
+                  dx = jour,
+                  dy = cas,
+                  tit,
+                  stit = "",
+                  colx,
+                  ytit = "n") {
+  pp <- ggplot(dd) +
+    aes(
+      x = {{ dx }},
+      y = {{ dy }}
+    ) +
+    geom_line(size = 0.4) +
+    geom_smooth(
+      span = 0.3,
+      col = colx,
+      se = FALSE,
+      method = "loess"
+    ) +
+    labs(
+      title = tit,
+      subtitle = stit,
+      y = ytit
+    ) +
+    theme_light() +
+    theme(
+      plot.title = element_text(size = 16, face = "bold"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(size = 12),
+      axis.text.x = element_text(size = 12),
+      axis.text.y = element_text(size = 12),
+      legend.position = "none"
+    )
+ # ggplotly(pp, tooltip = c("all"))
+ plot(pp)
+}
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois (France métropolitaine uniquement, les départements d'outre-mer ayant une évolution complètement différente pour des raisons géographiques évidentes). Données issues de l'INVS (Santé publique France). La présentation met en avant la moyenne mobile. Graphiques des entrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
+
+Données à jour le `r dj`.
+
+### Nouvelles hospitalisations depuis le début de l'épidémie
+
+```{r graphFr, warning=TRUE}
+zzf <- tt %>%
+  group_by(jour) %>%
+  summarise(sum(incid_hosp))
+names(zzf)[2] <- "cas"
+
+titre <-
+  paste0("France (", dj, ") - nouvelles hospitalisations")
+mongg(zzf,
+  tit = "France entière -  nouvelles hospitalisations",
+  stit = "Depuis le début de l'épidémie",
+  colx = "red"
+)
+```
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Moyenne hebdomadaire des admissions hospitalières
+
+```{r graphFr2, warning=TRUE, }
+
+mongg(tail(zzf, 122),
+  tit = "France entière - Trois derniers mois",
+  stit = "trois derniers mois",
+  colx = "blue"
+)
+
+```
+
+### France entière - Trois derniers mois
+
+
+```{r mhebdo}
+tz <- NULL
+dz <- NULL
+zz <- tt %>%
+  group_by(jour) %>%
+  summarise(sum(incid_hosp))
+zz <- tail(zz, 371)
+nz <- rev(seq(length(zz$jour) - 6, 1, -7))
+for (l in nz) {
+  l1 <- l + 6
+  tz <- c(tz, sum(zz[l:l1, 2]))
+  dz <- c(dz, zz$jour[l])
+}
+dz <- as.Date(dz, origin = "1970-01-01")
+aa <- tibble(dz, tz)
+names(aa) <- c("jour", "n")
+sem <- aa %>%
+  ggplot() +
+  aes(x = jour, y = n) +
+  geom_line() +
+  scale_y_log10() +
+  scale_x_date() +
+  geom_area(fill = "red", alpha = 0.4) +
+  labs(
+    title = "Admissions hospitalières - Hebdo",
+    subtitle = "Moyennes hebdomadaires",
+    y = "n"
+  ) +
+  theme_light() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "none"
+  )
+plot(sem)
+```
+
