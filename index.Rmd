@@ -16,7 +16,7 @@ output:
     anchor_sections: TRUE
   html_notebook:
     fig_caption: yes
-    theme: spacelab
+    theme: spacelab 
   pdf_document:
     includes:
       in_header: tete.tex
