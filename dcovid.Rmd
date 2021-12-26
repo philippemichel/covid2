@@ -4,7 +4,8 @@ subtitle: "Hospitalisations"
 author: "Philippe MICHEL"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
+    theme:  sandstone
+    orientation: rows
     vertical_layout: fill
     social: menu
 ---
@@ -65,21 +66,22 @@ mongg <- function(dd,
       axis.text.y = element_text(size = 12),
       legend.position = "none"
     )
- # ggplotly(pp, tooltip = c("all"))
- plot(pp)
+ggplotly(pp, tooltip = c("all"))
+ #plot(pp)
 }
 ```
+Row {data-height=80}
+-------------------------------------
 
-Column {data-width=500}
------------------------------------------------------------------------
+
 
 Visualisation des nouveaux cas hospitalisés pour COVID-19 sur les trois derniers mois (France métropolitaine uniquement, les départements d'outre-mer ayant une évolution complètement différente pour des raisons géographiques évidentes). Données issues de l'INVS (Santé publique France). La présentation met en avant la moyenne mobile. Graphiques des entrées à l'hôpital & en réanimation pour la France entière & le Val d'Oise.
-
 Données à jour le `r dj`.
 
-### Nouvelles hospitalisations depuis le début de l'épidémie
+Row
+-------------------------------------
 
-```{r graphFr, warning=TRUE}
+```{r graphFr, warning=FALSE, fig.width=20, fig.height=4}
 zzf <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_hosp))
@@ -88,22 +90,23 @@ names(zzf)[2] <- "cas"
 titre <-
   paste0("France (", dj, ") - nouvelles hospitalisations")
 mongg(zzf,
-  tit = "France entière -  nouvelles hospitalisations",
+  tit = "France métropolitaine -  nouvelles hospitalisations",
   stit = "Depuis le début de l'épidémie",
   colx = "red"
 )
 ```
 
+Row
+-------------------------------------
 
-Column {data-width=500}
------------------------------------------------------------------------
+
 
 ### Moyenne hebdomadaire des admissions hospitalières
 
-```{r graphFr2, warning=TRUE, }
+```{r graphFr2, warning=TRUE, fig.width=22, fig.height=7}
 
 mongg(tail(zzf, 122),
-  tit = "France entière - Trois derniers mois",
+  tit = "France métropolitaine - Trois derniers mois",
   stit = "trois derniers mois",
   colx = "blue"
 )
@@ -113,7 +116,7 @@ mongg(tail(zzf, 122),
 ### France entière - Trois derniers mois
 
 
-```{r mhebdo}
+```{r mhebdo, fig.width=22, fig.height=7}
 tz <- NULL
 dz <- NULL
 zz <- tt %>%
