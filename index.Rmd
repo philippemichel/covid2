@@ -47,9 +47,11 @@ library(dygraphs)
 ```
 
 ```{r import}
-tt <- read.csv2("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c",
-  as.is = FALSE
-) %>%
+tt <-
+  read.csv2(
+    "https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c",
+    as.is = FALSE
+  ) %>%
   filter(!dep %in% c("971", "972", "973", "974", "976"))
 #
 tt$jour <- ymd(tt$jour)
@@ -66,10 +68,8 @@ mongg <- function(dd,
                   colx,
                   ytit = "n") {
   pp <- ggplot(dd) +
-    aes(
-      x = {{ dx }},
-      y = {{ dy }}
-    ) +
+    aes(x = {{dx}},
+    y = {{dy}}) +
     geom_line(size = 0.4) +
     geom_smooth(
       span = 0.3,
@@ -77,11 +77,9 @@ mongg <- function(dd,
       se = FALSE,
       method = "loess"
     ) +
-    labs(
-      title = paste0("<br>", tit),
-      subtitle = stit,
-      y = ytit
-    ) +
+    labs(title = paste0("<br>", tit),
+         subtitle = stit,
+         y = ytit) +
     theme_light() +
     theme(
       plot.title = element_text(size = 16, face = "bold"),
@@ -91,7 +89,7 @@ mongg <- function(dd,
       axis.text.y = element_text(size = 12),
       legend.position = "none"
     )
- ggplotly(pp, tooltip = c("all"))
+  ggplotly(pp, tooltip = c("all"))
 }
 ```
 
@@ -110,10 +108,9 @@ names(zzf)[2] <- "cas"
 titre <-
   paste0("France (", dj, ") - nouvelles hospitalisations")
 mongg(zzf,
-  tit = "France entière -  nouvelles hospitalisations",
-  stit = "Depuis le début de l'épidémie",
-  colx = "red"
-)
+      tit = "France entière -  nouvelles hospitalisations",
+      stit = "Depuis le début de l'épidémie",
+      colx = "red")
 ```
 
 
@@ -150,7 +147,7 @@ zz <- tt %>%
   group_by(jour) %>%
   summarise(sum(incid_hosp))
 zz <- tail(zz, 371)
-nz <- rev(seq(length(zz$jour) - 6, 1, -7))
+nz <- rev(seq(length(zz$jour) - 6, 1,-7))
 for (l in nz) {
   l1 <- l + 6
   tz <- c(tz, sum(zz[l:l1, 2]))
@@ -166,11 +163,9 @@ sem <- aa %>%
   scale_y_log10() +
   scale_x_date() +
   geom_area(fill = "red", alpha = 0.4) +
-  labs(
-    title = "Admissions hospitalières - Hebdo",
-    subtitle = "Moyennes hebdomadaires",
-    y = "n"
-  ) +
+  labs(title = "Admissions hospitalières - Hebdo",
+       subtitle = "Moyennes hebdomadaires",
+       y = "n") +
   theme_light() +
   theme(
     plot.title = element_text(size = 16, face = "bold"),
